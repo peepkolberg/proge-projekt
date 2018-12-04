@@ -467,7 +467,13 @@ def quit():
 
 def healthBar(health):
     bg_bar = pygame.draw.rect(screen, (120, 30, 30), (20, constants.screen_height-30, int(max_health*1.5), 20))
-    bar = pygame.draw.rect(screen, constants.healthbar_color, (20, constants.screen_height-30, int(health/100*max_health*1.5), 20))
+
+    if health >= 0.66 * max_health:
+        bar = pygame.draw.rect(screen, constants.healthbar_color_high, (20, constants.screen_height-30, int(health/100*max_health*1.5), 20))
+    elif health >= 0.33 * max_health:
+        bar = pygame.draw.rect(screen, constants.healthbar_color_med, (20, constants.screen_height-30, int(health/100*max_health*1.5), 20))
+    else:
+        bar = pygame.draw.rect(screen, constants.healthbar_color_low, (20, constants.screen_height-30, int(health/100*max_health*1.5), 20))
 
 
 screen = pygame.display.set_mode((constants.screen_width, constants.screen_height))
