@@ -33,11 +33,6 @@ grave = pygame.transform.scale(grave, (tilesize, tilesize))
 #UI
 healthbar_color = 255, 0,0
 
-#PLAYER
-player_dmg = 10
-#ENEMY
-enemy_dmg = 10
-
 
 #ITEMS
 sword_sprite = pygame.image.load(os.path.join(dir,"Data",  "Sprites","sword.png"))

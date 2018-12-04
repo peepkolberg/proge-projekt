@@ -67,10 +67,10 @@ class AI:
                 x = 0
             else:
                 y=0
-        for obj in characters: #käib läbi iga tegelase, millel on AI component ja liigutb tegelast või ründab
+        for obj in characters: #käib läbi iga tegelase, millel on AI component ja liigutab tegelast või ründab
             if obj == self.owner:
                 if not self.owner.hp <= 0:
-                    attack = self.owner.attack(constants.enemy_dmg)
+                    attack = self.owner.attack(random.randint(0, 5))
                     if not attack :
                         self.owner.move(x,y)
 
@@ -254,7 +254,7 @@ def handle_move():
             if event.key == pygame.K_RSHIFT: # pick up item
                 pick_up(player.x, player.y)
             if event.key == pygame.K_SPACE:
-                player.attack(constants.player_dmg)
+                player.attack(random.randint(0, 10))
                 enemy_death()
                 return 'attack'
             if event.key == pygame.K_i and inv_bool:
