@@ -1,4 +1,3 @@
-# uus asi
 import sys
 import pygame, pygame.locals
 import time
@@ -317,7 +316,9 @@ def start():
     make_map()
     map_to_surf()
 def restart():
+    global inv
     if player.hp <= 0:
+        inv = []
         game_over = True
         over_text = font_comic.render('GAME OVER', False, (255,0,0))
         continue_text = font_comic.render('Press Enter to restart level', False, (255,255,255))
@@ -394,18 +395,18 @@ class inv_tile:
 def inventory():
     global inv_open, inv
     rows=4
-    collumns=4
+    columns=4
     inv_width= int(constants.screen_width/2)
     inv_height = constants.screen_height-300
-    row_width=int(inv_width/(collumns+1))
+    row_width=int(inv_width/(columns+1))
     row_height=row_width
-    table_spacing=int((inv_width-row_width*collumns)/(collumns+1))
+    table_spacing=int((inv_width-row_width*columns)/(columns+1))
     inv_open=True
 
     image_size = row_width-10
     text_inv = font_comic.render('INVENTORY', False, (66,75,84))
     active = None
-    inv_tilemap = [[inv_tile(False) for y in range(rows)] for x in range(collumns)]
+    inv_tilemap = [[inv_tile(False) for y in range(rows)] for x in range(columns)]
 
     while inv_open:
         pygame.draw.rect(screen, (214,187,192), (int(constants.screen_width/4), 0, int(constants.screen_width*0.5), constants.screen_height))
@@ -414,7 +415,7 @@ def inventory():
        
 
         for i in range(rows):
-            for z in range(collumns):
+            for z in range(columns):
 
                 if active == inv_tilemap[i][z]:
                     if inv_tilemap[i][z].item:
@@ -435,7 +436,6 @@ def inventory():
                     list_pos+=1
         
 
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -446,7 +446,7 @@ def inventory():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     for i in range(rows):
-                        for z in range(collumns):
+                        for z in range(columns):
                             if inv_tilemap[i][z].panel.collidepoint(pygame.mouse.get_pos()):
                                 if inv_tilemap[i][z].item:
                                     active = inv_tilemap[i][z]
@@ -456,6 +456,7 @@ def inventory():
 
   
         pygame.display.update()
+
            
 def resume():
     global menu_open
@@ -466,7 +467,7 @@ def quit():
 
 def healthBar(health):
     bg_bar = pygame.draw.rect(screen, (120, 30, 30), (20, constants.screen_height-30, int(max_health*1.5), 20))
-    bar = pygame.draw.rect(screen, constants.healthar_color, (20, constants.screen_height-30, int(health/100*max_health*1.5), 20))
+    bar = pygame.draw.rect(screen, constants.healthbar_color, (20, constants.screen_height-30, int(health/100*max_health*1.5), 20))
 
 
 screen = pygame.display.set_mode((constants.screen_width, constants.screen_height))

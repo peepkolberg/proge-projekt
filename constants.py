@@ -31,7 +31,7 @@ grave = pygame.image.load(os.path.join(dir,"Data", "Sprites", "grave.png"))
 grave = pygame.transform.scale(grave, (tilesize, tilesize))
 
 #UI
-healthar_color = 255, 0,0
+healthbar_color = 255, 0,0
 
 #PLAYER
 player_dmg = 10
