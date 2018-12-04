@@ -320,8 +320,8 @@ def restart():
     if player.hp <= 0:
         inv = []
         game_over = True
-        over_text = font_comic.render('GAME OVER', False, (255,0,0))
-        continue_text = font_comic.render('Press Enter to restart level', False, (255,255,255))
+        over_text = font.render('GAME OVER', False, (255,0,0))
+        continue_text = font.render('Press Enter to restart level', False, (255,255,255))
         while game_over:
             screen.blit(over_text, (int(constants.screen_width/2-over_text.get_rect()[2]/2), int(constants.screen_height/2-over_text.get_rect()[3]/2)))
             screen.blit(continue_text, (int(constants.screen_width/2-continue_text.get_rect()[2]/2), int(constants.screen_height/2-continue_text.get_rect()[3]/2+50)))
@@ -344,15 +344,20 @@ def restart():
 
 #MENUS/UI
 
+def menu_controls():
+    text_controls = font.render('CONTROLS', False, (66,75,84))
+
 def menu():
     global menu_open
     menu_open=True
-    font_comic = pygame.font.SysFont('Comic Sans MS', 40)
-    text_pause = font_comic.render('PAUSED', False, textcolor)
-    text_resume = font_comic.render('RESUME', False, textcolor, (255, 0, 0))
-    text_resume_hover = font_comic.render('RESUME', False, textcolor, (150, 50, 50))
-    text_quit = font_comic.render('QUIT', False, textcolor, (255, 0, 0))
-    text_quit_hover = font_comic.render('QUIT', False, textcolor, (150, 50, 50))
+    font = pygame.font.Font('data\\fonts\\VCR_OSD_MONO_1.001.ttf', 40)
+    text_pause = font.render('PAUSED', False, textcolor)
+    text_resume = font.render('RESUME', False, textcolor, (255, 0, 0))
+    text_resume_hover = font.render('RESUME', False, textcolor, (150, 50, 50))
+    text_controls = font.render('CONTROLS', False, textcolor, (255, 0, 0))
+    text_controls_hover = font.render('CONTROLS', False, textcolor, (150, 50, 50))
+    text_quit = font.render('QUIT', False, textcolor, (255, 0, 0))
+    text_quit_hover = font.render('QUIT', False, textcolor, (150, 50, 50))
     while menu_open:
         screen.blit(text_pause, (int(constants.screen_width/2-text_pause.get_rect()[2]/2), int(constants.screen_height/3-text_pause.get_rect()[3]/2)))
         b=screen.blit(text_resume, (int(constants.screen_width/2-text_resume.get_rect()[2]/2), int(constants.screen_height/2-text_resume.get_rect()[3]/2)))
@@ -361,6 +366,9 @@ def menu():
         c=screen.blit(text_quit, (int(constants.screen_width/2-text_quit.get_rect()[2]/2), int(constants.screen_height/2-text_quit.get_rect()[3]/2+70)))
         if c.collidepoint(pygame.mouse.get_pos()):
             c=screen.blit(text_quit_hover, (int(constants.screen_width/2-text_quit.get_rect()[2]/2), int(constants.screen_height/2-text_quit.get_rect()[3]/2+70)))
+        d = screen.blit(text_controls, (int(constants.screen_width/2-text_controls.get_rect()[2]/2), int(constants.screen_height/2-text_controls.get_rect()[3]/2+70)))
+        if d.collidepoint(pygame.mouse.get_pos()):
+            d=screen.blit(text_controls_hover, (int(constants.screen_width/2-text_controls.get_rect()[2]/2), int(constants.screen_height/2-text_controls.get_rect()[3]/2+70)))
         
             #button function
         for event in pygame.event.get():
@@ -376,6 +384,8 @@ def menu():
                         resume()
                     if c.collidepoint(pygame.mouse.get_pos()):
                         quit()
+                    if d.collidepoint(pygame.mouse.get_pos()):
+                        menu_controls()
                         
             
         
@@ -404,7 +414,7 @@ def inventory():
     inv_open=True
 
     image_size = row_width-10
-    text_inv = font_comic.render('INVENTORY', False, (66,75,84))
+    text_inv = font.render('INVENTORY', False, (66,75,84))
     active = None
     inv_tilemap = [[inv_tile(False) for y in range(rows)] for x in range(columns)]
 
@@ -419,7 +429,7 @@ def inventory():
 
                 if active == inv_tilemap[i][z]:
                     if inv_tilemap[i][z].item:
-                        item_name = font_comic.render(inv_tilemap[i][z].item.name, False, textcolor)
+                        item_name = font.render(inv_tilemap[i][z].item.name, False, textcolor)
                         screen.blit(item_name, (int(constants.screen_width/2-item_name.get_rect()[2]/2), constants.screen_height - 100))
 
 
@@ -517,8 +527,8 @@ start()
 clock = pygame.time.Clock()
 font = pygame.font.Font(None, 30)
 textcolor = 255, 255, 255
-font_comic = pygame.font.SysFont('Comic Sans MS', 40)
-font_comic_small = pygame.font.SysFont('Comic Sans MS', 20)
+font = pygame.font.Font('data\\fonts\\VCR_OSD_MONO_1.001.ttf', 40)
+font_small = pygame.font.Font('data\\fonts\\VCR_OSD_MONO_1.001.ttf', 40)
 while 1:
     clock.tick(60)
     movement_loop()

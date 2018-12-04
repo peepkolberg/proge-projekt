@@ -7,7 +7,6 @@ pygame.init()
 #SCREEN
 screen_width = 800
 screen_height = 600
-
 white_transparent= 255, 255,255,0
 
 
@@ -30,10 +29,12 @@ enemy_pilt = pygame.transform.scale(enemy_pilt, (tilesize, tilesize))
 grave = pygame.image.load(os.path.join(dir,"Data", "Sprites", "grave.png"))
 grave = pygame.transform.scale(grave, (tilesize, tilesize))
 
+
 #UI
 healthbar_color_low = 255, 0,0
 healthbar_color_med = 255, 255, 0
 healthbar_color_high = 0, 255, 0
+font = pygame.font.Font('data\\fonts\\VCR_OSD_MONO_1.001.ttf', 40)
 
 
 #ITEMS
