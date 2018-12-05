@@ -6,7 +6,6 @@ import random
 import constants
 dir = os.path.dirname(os.path.abspath(__file__))
 
-
 pygame.init()
 pygame.font.init()
 
@@ -14,7 +13,6 @@ inv = []
 inv_bool = False
 max_health = 100
 fullscreen = False
-
 
 class Actor:
     def __init__(self, playerrect, pilt, x, y, hp=0, ai=None, enemy=None):
@@ -50,9 +48,8 @@ class Actor:
                     return False
                 else:
                     object.hp -=damage
-
-                
                 return True
+
     def draw(self):
         screen.blit(self.pilt, self.playerrect)
 
@@ -83,6 +80,15 @@ class Item:
         self.inv_sprite = inv_sprite
         self.drop_percent = drop_percent
 
+class inv_tile:
+    def __init__(self, filled, panel = None,  item=None, active=False):
+        self.filled = filled
+        self.active = active
+        if panel:
+            self.panel = panel
+        
+        self.item = item
+
 class Room:
     #ristkülik mis iseloomustab ruumi
     def __init__(self, x, y, w, h):
@@ -111,7 +117,6 @@ class Tile:
         self.grave = grave
 
 #MAP GENERATION
-
 def create_room(room, door_x =None, door_y=None):
     global map, items
     gen_item = random.randint(0, 1) #valib suvaliselt kas asetada item ruumi
@@ -120,12 +125,14 @@ def create_room(room, door_x =None, door_y=None):
         item_y = random.randint(room.y1+1, room.y2-1)
         item_to_gen=random.randint(0, len(items)-1)
         (items[item_to_gen].x, items[item_to_gen].y) = (item_x, item_y)
+
     gen_enemy = random.randint(0, 1) #valib suvaliselt kas asetada enemy ruumi
     if gen_enemy:
         enemy_x = random.randint(room.x1+1, room.x2-1)
         enemy_y = random.randint(room.y1+1, room.y2-1)
         characters.append(Actor(constants.enemy_pilt.get_rect(), constants.enemy_pilt, enemy_x, enemy_y, hp=100, ai=AI()))
         characters[-1].playerrect = characters[-1].playerrect.move(enemy_x*constants.tilesize, enemy_y*constants.tilesize)
+
     #käib läbi vastavad tile-id, et muuta need läbipääsetavaks
     for x in range(room.x1+1, room.x2):
         for y in range(room.y1+1, room.y2):
@@ -142,13 +149,12 @@ def create_room(room, door_x =None, door_y=None):
         map[door_x][door_y].blocked = False
         map[door_x][door_y].block_sight = False
 
-
-    
 def make_map():
     global map
     map = [[Tile(True) for y in range(constants.map_height)] for x in range(constants.map_width)]
     rooms = []
     num_rooms = 0
+
     for r in range(constants.max_rooms):
         #valib suvaliselt ruumi suuruse
         w = random.randint(constants.room_min_size, constants.room_max_size)
@@ -188,16 +194,19 @@ def make_map():
                     door_y= int(new_room.y1+h/2)
                     if door_x>=1 and door_y>=1 and door_x<constants.map_width and door_y< constants.map_height:
                         if map[door_x+1][door_y].blocked: continue
+
             if new_room.x1 < 1 or new_room.x2>=constants.map_width or new_room.y1<1 or new_room.y2>=constants.map_height: continue
             
             prev_w = w
             prev_h = h
+
         #vaatab et uus ruum ei lõikuks varasematega
         failed = False
         for other_room in rooms:
             if new_room.intersect(other_room):
                 failed = True
                 break
+
         if not failed:
             #ruum ei lõikund teistega järelikult asetab uue ruumi mapile
             if num_rooms == 0:
@@ -221,7 +230,6 @@ def map_to_surf(): # loob mapile uue surface, et säästa ressursse, kui pole va
             if not map[x][y].item is None:
                 map_surf.blit(map[x][y].item.sprite, (x*constants.tilesize, y*constants.tilesize))
 
-            
 def render():
     global characters
     screen.blit(map_surf, (0, 0))
@@ -230,9 +238,9 @@ def render():
     healthBar(player.hp)
 
 #GAMEPLAY
-
 def handle_move():
     global inv, inv_bool, fullscreen
+
     #turn based
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -251,22 +259,28 @@ def handle_move():
             elif event.key == pygame.K_RIGHT: #move player right
                 player.move(1, 0)
                 return 'move'
+
             if event.key == pygame.K_RSHIFT: # pick up item
                 pick_up(player.x, player.y)
+
             if event.key == pygame.K_SPACE:
                 player.attack(random.randint(0, 10))
                 enemy_death()
                 return 'attack'
+
             if event.key == pygame.K_i and inv_bool:
                 inv_surface.set_alpha(0)
                 inv_bool = False
             elif event.key == pygame.K_i and not inv_bool:
                 inv_surface.set_alpha(255)
                 inv_bool = True
+
             if event.key == pygame.K_ESCAPE:
                 menu()
+
             if event.key == pygame.K_i:
                 inventory()
+
             if event.key == pygame.K_F11:
                 if not fullscreen:
                     screen = pygame.display.set_mode((constants.screen_width, constants.screen_height), pygame.FULLSCREEN)
@@ -275,15 +289,15 @@ def handle_move():
                     screen = pygame.display.set_mode((constants.screen_width, constants.screen_height))
                     fullscreen = False
 
-   
-
 def movement_loop():
     player_action = 'nothing'
     player_action = handle_move()
+
     if player_action == 'move' or player_action == 'attack':
         for obj in characters:
             if obj != player:
                 obj.ai.take_turn()
+
     player_action = 'nothing'
 
 def pick_up(x, y):
@@ -296,14 +310,17 @@ def pick_up(x, y):
 
 def enemy_death():
     global map, items
+
     for obj in characters:
         if obj is not player:
             if obj.hp <=0:
                 map[obj.x][obj.y].grave = True
                 rand = random.randint(0, len(items)-1)
                 drop = random.randint(0, 100)
+
                 if items[rand].drop_percent <= drop:
                     map[obj.x][obj.y].item = items[rand]
+
                 map_to_surf()
                 if obj in characters:
                     characters.remove(obj)
@@ -315,6 +332,7 @@ def start():
 
     make_map()
     map_to_surf()
+
 def restart():
     global inv
     if player.hp <= 0:
@@ -322,9 +340,11 @@ def restart():
         game_over = True
         over_text = font.render('GAME OVER', False, (255,0,0))
         continue_text = font.render('Press Enter to restart level', False, (255,255,255))
+
         while game_over:
             screen.blit(over_text, (int(constants.screen_width/2-over_text.get_rect()[2]/2), int(constants.screen_height/2-over_text.get_rect()[3]/2)))
             screen.blit(continue_text, (int(constants.screen_width/2-continue_text.get_rect()[2]/2), int(constants.screen_height/2-continue_text.get_rect()[3]/2+50)))
+            
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     quit()
@@ -340,12 +360,34 @@ def restart():
                         make_map()
                         map_to_surf()
                         game_over = False
+
             pygame.display.update()
 
 #MENUS/UI
+def resume():
+    global menu_open
+    menu_open = False
 
-def menu_controls():
+def quit():
+    pygame.quit()
+    sys.exit()
+
+def controls():
     text_controls = font.render('CONTROLS', False, (66,75,84))
+    controls_open = True
+    active = None
+
+    while controls_open:
+        pygame.draw.rect(screen, (214,187,192), (int(constants.screen_width/4), 0, int(constants.screen_width*0.5), constants.screen_height))
+        screen.blit(text_controls, (int(constants.screen_width/2-text_controls.get_rect()[2]/2), 30-text_controls.get_rect()[3]/2))
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    controls_open = False
 
 def menu():
     global menu_open
@@ -358,52 +400,47 @@ def menu():
     text_controls_hover = font.render('CONTROLS', False, textcolor, (150, 50, 50))
     text_quit = font.render('QUIT', False, textcolor, (255, 0, 0))
     text_quit_hover = font.render('QUIT', False, textcolor, (150, 50, 50))
+
     while menu_open:
         screen.blit(text_pause, (int(constants.screen_width/2-text_pause.get_rect()[2]/2), int(constants.screen_height/3-text_pause.get_rect()[3]/2)))
+
         b=screen.blit(text_resume, (int(constants.screen_width/2-text_resume.get_rect()[2]/2), int(constants.screen_height/2-text_resume.get_rect()[3]/2)))
         if b.collidepoint(pygame.mouse.get_pos()):
             b=screen.blit(text_resume_hover, (int(constants.screen_width/2-text_resume.get_rect()[2]/2), int(constants.screen_height/2-text_resume.get_rect()[3]/2)))
-        c=screen.blit(text_quit, (int(constants.screen_width/2-text_quit.get_rect()[2]/2), int(constants.screen_height/2-text_quit.get_rect()[3]/2+70)))
+        
+        c=screen.blit(text_quit, (int(constants.screen_width/2-text_quit.get_rect()[2]/2), int(constants.screen_height/2-text_quit.get_rect()[3]/2+140)))
         if c.collidepoint(pygame.mouse.get_pos()):
-            c=screen.blit(text_quit_hover, (int(constants.screen_width/2-text_quit.get_rect()[2]/2), int(constants.screen_height/2-text_quit.get_rect()[3]/2+70)))
+            c=screen.blit(text_quit_hover, (int(constants.screen_width/2-text_quit.get_rect()[2]/2), int(constants.screen_height/2-text_quit.get_rect()[3]/2+140)))
+        
         d = screen.blit(text_controls, (int(constants.screen_width/2-text_controls.get_rect()[2]/2), int(constants.screen_height/2-text_controls.get_rect()[3]/2+70)))
         if d.collidepoint(pygame.mouse.get_pos()):
             d=screen.blit(text_controls_hover, (int(constants.screen_width/2-text_controls.get_rect()[2]/2), int(constants.screen_height/2-text_controls.get_rect()[3]/2+70)))
         
-            #button function
+        #button function
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     menu_open = False
+
             if event.type == pygame.MOUSEBUTTONDOWN:
                if event.button == 1:
                     if b.collidepoint(pygame.mouse.get_pos()):
                         resume()
+
                     if c.collidepoint(pygame.mouse.get_pos()):
                         quit()
-                    if d.collidepoint(pygame.mouse.get_pos()):
-                        menu_controls()
-                        
-            
-        
-        pygame.display.update()
-class inv_tile:
-    def __init__(self, filled, panel = None,  item=None, active=False):
-        self.filled = filled
-        self.active = active
-        if panel:
-            self.panel = panel
-        
-        self.item = item
-        
-            
 
+                    if d.collidepoint(pygame.mouse.get_pos()):
+                        controls()
+                    
+        pygame.display.update()
 
 def inventory():
-    global inv_open, inv
+    global inv
     rows=4
     columns=4
     inv_width= int(constants.screen_width/2)
@@ -422,16 +459,13 @@ def inventory():
         pygame.draw.rect(screen, (214,187,192), (int(constants.screen_width/4), 0, int(constants.screen_width*0.5), constants.screen_height))
         screen.blit(text_inv, (int(constants.screen_width/2-text_inv.get_rect()[2]/2), 30-text_inv.get_rect()[3]/2))
         list_pos=0
-       
 
         for i in range(rows):
             for z in range(columns):
-
                 if active == inv_tilemap[i][z]:
                     if inv_tilemap[i][z].item:
                         item_name = font.render(inv_tilemap[i][z].item.name, False, textcolor)
                         screen.blit(item_name, (int(constants.screen_width/2-item_name.get_rect()[2]/2), constants.screen_height - 100))
-
 
                 x=(int(constants.screen_width/4)+table_spacing+z*(table_spacing+row_width))
                 y=50+table_spacing+i*(table_spacing+row_height)
@@ -445,7 +479,6 @@ def inventory():
                     inv_tilemap[i][z].item = inv[list_pos]
                     list_pos+=1
         
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -462,18 +495,8 @@ def inventory():
                                     active = inv_tilemap[i][z]
                                 else:
                                     active = None
-                                
-
   
         pygame.display.update()
-
-           
-def resume():
-    global menu_open
-    menu_open = False
-def quit():
-    pygame.quit()
-    sys.exit()
 
 def healthBar(health):
     bg_bar = pygame.draw.rect(screen, (120, 30, 30), (20, constants.screen_height-30, int(max_health*1.5), 20))
@@ -485,14 +508,11 @@ def healthBar(health):
     else:
         bar = pygame.draw.rect(screen, constants.healthbar_color_low, (20, constants.screen_height-30, int(health/100*max_health*1.5), 20))
 
-
 screen = pygame.display.set_mode((constants.screen_width, constants.screen_height))
 inv_surface = pygame.Surface((constants.screen_width, constants.screen_height))
 inv_surface=pygame.Surface.convert_alpha(inv_surface)
 inv_surface.fill(constants.white_transparent)
 map_surf = pygame.Surface((constants.screen_width, constants.screen_height))
-
-
 
 player = Actor(constants.player_pilt.get_rect(), constants.player_pilt, 0, 0, 100)
 characters= [player]
@@ -529,12 +549,13 @@ font = pygame.font.Font(None, 30)
 textcolor = 255, 255, 255
 font = pygame.font.Font('data\\fonts\\VCR_OSD_MONO_1.001.ttf', 40)
 font_small = pygame.font.Font('data\\fonts\\VCR_OSD_MONO_1.001.ttf', 40)
+
 while 1:
     clock.tick(60)
     movement_loop()
     render()
     restart()
-    fps = font.render(str(int(clock.get_fps())), True, pygame.Color('white')) #fps counter
+    fps = font.render(str(int(clock.get_fps())), True, pygame.Color('white')) #fps counter #pcmasterrace
     screen.blit(fps, (0, 0))
+
     pygame.display.update()
-    
