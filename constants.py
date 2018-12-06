@@ -4,6 +4,7 @@ import random
 dir = os.path.dirname(os.path.abspath(__file__))
 pygame.init()
 
+
 #SCREEN
 screen_width = 800
 screen_height = 600
@@ -35,6 +36,13 @@ healthbar_color_low = 255, 0,0
 healthbar_color_med = 255, 255, 0
 healthbar_color_high = 0, 255, 0
 font = pygame.font.Font('data\\fonts\\VCR_OSD_MONO_1.001.ttf', 40)
+
+
+#GAMEPLAY
+player_min_dmg = 0
+player_max_dmg = 10
+enemy_min_dmg = 0
+enemy_max_dmg = 10
 
 
 #ITEMS

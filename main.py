@@ -11,6 +11,7 @@ pygame.font.init()
 
 inv = []
 inv_bool = False
+inv_sõnadena = []
 max_health = 100
 fullscreen = False
 
@@ -55,6 +56,7 @@ class Actor:
 
 class AI:
     def take_turn(self):
+        global inv_sõnadena
         x=random.randint(-1, 1)
         y=random.randint(-1, 1)
         
@@ -67,7 +69,17 @@ class AI:
         for obj in characters: #käib läbi iga tegelase, millel on AI component ja liigutab tegelast või ründab
             if obj == self.owner:
                 if not self.owner.hp <= 0:
-                    attack = self.owner.attack(random.randint(0, 5))
+                    enemy_reduced_dmg = 0
+                    if 'shield' in inv_sõnadena:
+                        enemy_reduced_dmg += 2
+                    if 'armor' in inv_sõnadena:
+                        enemy_reduced_dmg += 5
+
+                    enemy_attack_power = random.randint(constants.enemy_min_dmg, constants.enemy_max_dmg) - enemy_reduced_dmg
+                    if enemy_attack_power < 0:
+                        enemy_attack_power = 0
+                    attack = self.owner.attack(enemy_attack_power)
+
                     if not attack :
                         self.owner.move(x,y)
 
@@ -136,7 +148,7 @@ def create_room(room, door_x =None, door_y=None):
     #käib läbi vastavad tile-id, et muuta need läbipääsetavaks
     for x in range(room.x1+1, room.x2):
         for y in range(room.y1+1, room.y2):
-            
+ 
             if gen_item and x == items[item_to_gen].x and y == items[item_to_gen].y:
                 map[x][y].item = items[item_to_gen]
                 map[x][y].blocked = False
@@ -239,7 +251,7 @@ def render():
 
 #GAMEPLAY
 def handle_move():
-    global inv, inv_bool, fullscreen
+    global inv, inv_bool, fullscreen, inv_sõnadena
 
     #turn based
     for event in pygame.event.get():
@@ -264,7 +276,14 @@ def handle_move():
                 pick_up(player.x, player.y)
 
             if event.key == pygame.K_SPACE:
-                player.attack(random.randint(0, 10))
+                player_extra_dmg = 0
+                if 'sword' in inv_sõnadena:
+                    player_extra_dmg += 5
+                if 'beer' in inv_sõnadena:
+                    player_extra_dmg += 3
+                if 'flame sword' in inv_sõnadena:
+                    player_extra_dmg += 10
+                player.attack(random.randint(constants.player_min_dmg, constants.player_max_dmg) + player_extra_dmg)
                 enemy_death()
                 return 'attack'
 
@@ -275,11 +294,11 @@ def handle_move():
                 inv_surface.set_alpha(255)
                 inv_bool = True
 
-            if event.key == pygame.K_ESCAPE:
-                menu()
-
             if event.key == pygame.K_i:
                 inventory()
+
+            if event.key == pygame.K_ESCAPE:
+                menu()
 
             if event.key == pygame.K_F11:
                 if not fullscreen:
@@ -301,11 +320,14 @@ def movement_loop():
     player_action = 'nothing'
 
 def pick_up(x, y):
-    global inv, map
+    global inv, map, inv_sõnadena
     
     if not map[x][y].item is None:
         inv.append(map[x][y].item)
+        item_name = map[x][y].item.name
+        inv_sõnadena.append(item_name)
         map[x][y].item = None
+
     map_to_surf()
 
 def enemy_death():
@@ -334,9 +356,10 @@ def start():
     map_to_surf()
 
 def restart():
-    global inv
+    global inv, inv_sõnadena
     if player.hp <= 0:
         inv = []
+        inv_sõnadena = []
         game_over = True
         over_text = font.render('GAME OVER', False, (255,0,0))
         continue_text = font.render('Press Enter to restart level', False, (255,255,255))
