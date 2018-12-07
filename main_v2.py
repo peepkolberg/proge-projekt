@@ -753,7 +753,7 @@ class Actor:
     def healthBar(self, health):
         global ui
         bg_bar = pygame.draw.rect(ui, (120, 30, 30), (20, constants.screen_height-30, int(constants.max_health*1.5), 20))
-        bar = pygame.draw.rect(ui, constants.healthar_color, (20, constants.screen_height-30, int(health/100*constants.max_health*1.5), 20))
+        bar = pygame.draw.rect(ui, constants.healthbar_color_high, (20, constants.screen_height-30, int(health/100*constants.max_health*1.5), 20))
     def pick_up(self, x, y):
         global inv, map
         if not map[x][y].item is None:
