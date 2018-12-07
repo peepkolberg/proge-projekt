@@ -4,32 +4,39 @@ import random
 dir = os.path.dirname(os.path.abspath(__file__))
 pygame.init()
 
-
 #SCREEN
-screen_width = 800
-screen_height = 600
+screen_width = 1280
+screen_height = 720
+resolutions = {'1920x1080':(1920, 1080), '1366x720':(1366, 720), '800x600':(800, 600)}
 white_transparent= 255, 255,255,0
+fullscreen=False
 
 
 #MAP
-tilesize = 20
-map_width = int(screen_width/tilesize)
-map_height = int(screen_height/tilesize)
-room_max_size = 8
-room_min_size = 5
+tilesize = 64
+map_width = 20
+map_height = 20
+room_max_size = 6
+room_min_size = 4
 max_rooms = 200 # mitu ruumi PROOVIB genereerida
 
 floor_sprite = pygame.image.load(os.path.join(dir,"Data", "Sprites", "floor.png"))
-floor_sprite = pygame.transform.scale(floor_sprite,(tilesize, tilesize))
 wall_sprite = pygame.image.load(os.path.join(dir,"Data", "Sprites", "wall.png"))
-wall_sprite = pygame.transform.scale(wall_sprite,(tilesize, tilesize))
+floor_dark_sprite = pygame.image.load(os.path.join(dir,"Data", "Sprites", "floor_dark.png"))
+wall_dark_sprite = pygame.image.load(os.path.join(dir,"Data", "Sprites", "wall_dark.png"))
 player_pilt = pygame.image.load(os.path.join(dir,"Data", "Sprites", "character.png"))
-player_pilt = pygame.transform.scale(player_pilt, (tilesize, tilesize))
 enemy_pilt = pygame.image.load(os.path.join(dir,"Data", "Sprites", "enemy.png"))
-enemy_pilt = pygame.transform.scale(enemy_pilt, (tilesize, tilesize))
 grave = pygame.image.load(os.path.join(dir,"Data", "Sprites", "grave.png"))
-grave = pygame.transform.scale(grave, (tilesize, tilesize))
+grave_dark = pygame.image.load(os.path.join(dir,"Data", "Sprites", "grave.png"))
 
+floor_sprite = pygame.transform.scale(floor_sprite,(tilesize, tilesize))
+wall_sprite = pygame.transform.scale(wall_sprite,(tilesize, tilesize))
+floor_dark_sprite = pygame.transform.scale(floor_dark_sprite,(tilesize, tilesize))
+wall_dark_sprite = pygame.transform.scale(wall_dark_sprite,(tilesize, tilesize))
+player_pilt = pygame.transform.scale(player_pilt, (tilesize, tilesize))
+enemy_pilt = pygame.transform.scale(enemy_pilt, (tilesize, tilesize))
+grave = pygame.transform.scale(grave, (tilesize, tilesize))
+grave_dark = pygame.transform.scale(grave_dark, (tilesize, tilesize))
 
 #UI
 healthbar_color_low = 255, 0,0
@@ -37,15 +44,32 @@ healthbar_color_med = 255, 255, 0
 healthbar_color_high = 0, 255, 0
 font = pygame.font.Font('data\\fonts\\VCR_OSD_MONO_1.001.ttf', 40)
 
-
-#GAMEPLAY
+#PLAYER
+player_dmg = 5
+player_armor = 0
+max_health = 200
 player_min_dmg = 0
 player_max_dmg = 10
 enemy_min_dmg = 0
 enemy_max_dmg = 10
+#ENEMY
+enemy_dmg = 4
+min_enemies = 3
+
+#FOV
+Fov_enabled = True
+fov_radius = 6
+fov_light_walls = True
 
 
 #ITEMS
+inv_rows = 4
+inv_collumns = 4
+health_potion_heal_ammount = 30
+big_health_potion_heal_ammount = 60
+beer_heal_ammount = 15
+
+
 sword_sprite = pygame.image.load(os.path.join(dir,"Data",  "Sprites","sword.png"))
 sword_sprite_inv = pygame.transform.scale(sword_sprite, (50, 50))
 sword_sprite = pygame.transform.scale(sword_sprite, (tilesize,tilesize))
