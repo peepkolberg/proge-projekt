@@ -16,7 +16,7 @@ else:
 
 class Game:
     def initialize(self):
-        global camera, player, map_surf, screen, kaart, characters, ui, inv_bool, inv, inv_surface, equiped_items, level
+        global camera, player, map_surf, screen, kaart, characters, ui, inv_bool, inv, inv_surface, equipped_items, level
         pygame.init()
         pygame.font.init()
         screen = pygame.display.set_mode((constants.screen_width, constants.screen_height), pygame.HWSURFACE)
@@ -31,11 +31,12 @@ class Game:
         inv=[]
         inv_bool=False
         characters= [player]
-        equiped_items = []
+        equipped_items = []
         for m in range(5):
-            equiped_items.append(0)
+            equipped_items.append(0)
         kaart = Map()
         level = 1
+
     def game_loop(self):
         global screen, map_surf,kaart, characters, ui
         kaart.make_map()
@@ -53,15 +54,15 @@ class Game:
             fps = font.render(str(int(clock.get_fps())), True, pygame.Color('white'), (0,0,0))
             screen.blit(fps, (0, 0))
             pygame.display.update()
+
     def handle_move(self):
-        global inv, inv_bool, fullscreen, fov_calculate, player, inv_bool
+        global inv, inv_bool, fullscreen, fov_calculate, player
         #turn based
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 quit()
 
             if event.type == pygame.KEYDOWN:
-                
                 if event.key == pygame.K_UP: # Move player up
                     player.move(0, -1)
                     fov_calculate = True
@@ -96,8 +97,8 @@ class Game:
                     else:
                         constants.fullscreen = False
                         Camera().resolution_control(constants.screen_width, constants.screen_height)
+
     def movement_loop(self):
-        
         Game().restart()
         player_action = 'nothing'
         player_action = Game().handle_move()
@@ -108,13 +109,14 @@ class Game:
                 if obj != player:
                     obj.ai.take_turn()
         player_action = 'nothing'
+
     def restart(self, form_menu = False):
         global map_surf, characters, player, map
         if player.hp <= 0:
             game_over = True
-            font_comic = pygame.font.SysFont('Comic Sans MS', 40)
-            over_text = font_comic.render('GAME OVER', False, (255,0,0))
-            continue_text = font_comic.render('Press Enter to restart level', False, (255,255,255))
+            font = constants.font
+            over_text = font.render('GAME OVER', False, (255,0,0))
+            continue_text = font.render('Press Enter to restart level', False, (255,255,255))
             while game_over:
                 screen.blit(over_text, (int(constants.screen_width/2-over_text.get_rect()[2]/2), int(constants.screen_height/2-over_text.get_rect()[3]/2)))
                 screen.blit(continue_text, (int(constants.screen_width/2-continue_text.get_rect()[2]/2), int(constants.screen_height/2-continue_text.get_rect()[3]/2+50)))
@@ -137,8 +139,6 @@ class Game:
                             player.hp = 100
                             Map().calculate_fov()
                             Map().map_to_surf()
-                            
-                            
                             game_over = False
                 pygame.display.update()
         elif form_menu:
@@ -152,6 +152,7 @@ class Game:
             player.hp = 100
             Map().calculate_fov()
             Map().map_to_surf()
+
     def draw_game(self):
         Game().movement_loop()
         kaart.calculate_fov()
@@ -161,12 +162,13 @@ class Game:
             obj.draw()
         screen.blit(map_surf, (0, 0),((player.x)*constants.tilesize-int(constants.screen_width/2), (player.y)*constants.tilesize-int(constants.screen_height/2), constants.screen_width, constants.screen_height))
         screen.blit(ui, (0,0))
+
     def win(self):
         global characters, level
         if len(characters)==1:
-            font_comic = pygame.font.SysFont('Comic Sans MS', 40)
-            over_text = font_comic.render('ALL ENEMIES DESTROYED', False, (255,0,0))
-            continue_text = font_comic.render('Press Enter to advance to next level', False, (255,255,255))
+            font = constants.font
+            over_text = font.render('ALL ENEMIES DESTROYED', False, (255,0,0))
+            continue_text = font.render('Press Enter to advance to next level', False, (255,255,255))
             level_over = True
             while level_over:
                 screen.blit(over_text, (int(constants.screen_width/2-over_text.get_rect()[2]/2), int(constants.screen_height/2-over_text.get_rect()[3]/2)))
@@ -203,6 +205,7 @@ class Map:
             #returns true if this rectangle intersects with another one
             return (self.x1 < other.x2 and self.x2 > other.x1 and
                     self.y1 < other.y2 and self.y2 > other.y1)
+
     def create_room(self, room, door_x =None, door_y=None):
         global map, items, spawn_item
         spawn_item = True
@@ -219,20 +222,19 @@ class Map:
         if door_x is not None and door_y is not None:
             map[door_x][door_y].blocked = False
             map[door_x][door_y].block_sight = False
+
     def map_to_surf(self):
         global map, camera, map_surf
         map_surf.fill((0, 0, 0))
         camera_rect = pygame.Rect(player.x*constants.tilesize-int(constants.screen_width/2), player.y*constants.tilesize-int(constants.screen_height/2), constants.screen_width, constants.screen_height)
         for y in range(constants.map_height):
             for x in range(constants.map_width):
-                
                 tilerect = pygame.Rect((x*constants.tilesize, y*constants.tilesize), (constants.tilesize, constants.tilesize))
                 if camera_rect.collidepoint(tilerect[0],tilerect[1]+constants.tilesize/2):
                     wall = map[x][y].blocked
                     if constants.Fov_enabled:
                         visible = libtcod.map_is_in_fov(fov_map, x, y)
                         if visible:
-                        
                             map[x][y].explored = True
                             if wall:
                                 map_surf.blit(constants.wall_sprite, (x*constants.tilesize, y*constants.tilesize))
@@ -259,6 +261,7 @@ class Map:
                             map_surf.blit(constants.grave, (x*constants.tilesize, y*constants.tilesize))
                         if not map[x][y].item is None:
                             map_surf.blit(map[x][y].item.sprite, (x*constants.tilesize, y*constants.tilesize))
+    
     def make_map(self):
         global map, fov_calculate
         map = [[Map().Tile(True) for y in range(constants.map_height)] for x in range(constants.map_width)]
@@ -315,22 +318,22 @@ class Map:
                     failed = True
                     break
             if not failed:
-                #this means there are no intersections, so this room is valid
-                #"paint" it to the map's tiles
+                #lõikepunkte pole, järelikult asetab mapile
                 if num_rooms == 0:
                     Map().create_room(new_room)
                 else:
                     Map().create_room(new_room, door_x, door_y)
-
                 rooms.append(new_room)
                 num_rooms += 1
         Map().create_fov_map()
+
     def create_fov_map(self):
         global fov_map
         fov_map = libtcod.map_new(constants.map_width, constants.map_height)
         for y in range(0, constants.map_height):
             for x in range(0, constants.map_width):
                 libtcod.map_set_properties(fov_map, x, y, not map[x][y].blocked, not map[x][y].blocked)
+    
     def calculate_fov(self):
         global fov_calculate, fov_map
         if fov_calculate:
@@ -373,29 +376,29 @@ class Menus:
             if button_rect.collidepoint(pygame.mouse.get_pos()):
                 button_rect=screen.blit(button_text_hover, (int(pos[0]), int(pos[1])))
         return button_rect
+
     def menu(self):
         global menu_open, screen, level
         menu_open=True
         res_bool = False
-        font_comic = pygame.font.SysFont('Comic Sans MS', 40)
+        font = constants.font
         textcolor = (255, 255, 255)
-        text_pause = font_comic.render('PAUSED', False, textcolor)
-        text_level = font_comic.render('Level: '+str(level), False, textcolor)
+        text_pause = font.render('PAUSED', False, textcolor)
+        text_level = font.render('Level: '+str(level), False, textcolor)
         while menu_open:
             if not res_bool:
                 screen.fill((0,0,0,0))
                 screen.blit(text_level, (int(constants.screen_width/2-text_level.get_rect()[2]/2), int(constants.screen_height/2-text_pause.get_rect()[3]/2)-140))
                 screen.blit(text_pause, (int(constants.screen_width/2-text_pause.get_rect()[2]/2), int(constants.screen_height/2-text_pause.get_rect()[3]/2)-300))
-                resume_btn = Menus().button('RESUME', (constants.screen_width/2, constants.screen_height/2-70), textcolor, (255, 0, 0), (150, 50, 50), font_comic)
-                restart_btn = Menus().button('RESTART', (constants.screen_width/2, constants.screen_height/2), textcolor, (255, 0, 0), (150, 50, 50), font_comic)
-                quit_btn = Menus().button('QUIT', (constants.screen_width/2, constants.screen_height/2+70), textcolor, (255, 0, 0), (150, 50, 50), font_comic)
-                resolution_btn = Menus().button('RESOLUTIONS', (constants.screen_width/2, constants.screen_height/2+140), textcolor, (255, 0, 0), (150, 50, 50), font_comic)
-
+                resume_btn = Menus().button('RESUME', (constants.screen_width/2, constants.screen_height/2-70), textcolor, (255, 0, 0), (150, 50, 50), font)
+                restart_btn = Menus().button('RESTART', (constants.screen_width/2, constants.screen_height/2), textcolor, (255, 0, 0), (150, 50, 50), font)
+                quit_btn = Menus().button('QUIT', (constants.screen_width/2, constants.screen_height/2+70), textcolor, (255, 0, 0), (150, 50, 50), font)
+                resolution_btn = Menus().button('RESOLUTIONS', (constants.screen_width/2, constants.screen_height/2+140), textcolor, (255, 0, 0), (150, 50, 50), font)
             elif res_bool:
                 screen.fill((0,0,0,0))
-                res1 = Menus().button('1920x1080', (constants.screen_width/2, constants.screen_height/2), textcolor, (255, 0, 0), (150, 50, 50), font_comic)
-                res2 = Menus().button('1280x720', (constants.screen_width/2, constants.screen_height/2+70), textcolor, (255, 0, 0), (150, 50, 50), font_comic)
-                back = Menus().button('BACK', (constants.screen_width/2, constants.screen_height/2+140), textcolor, (255, 0, 0), (150, 50, 50), font_comic)
+                res1 = Menus().button('1920x1080', (constants.screen_width/2, constants.screen_height/2), textcolor, (255, 0, 0), (150, 50, 50), font)
+                res2 = Menus().button('1280x720', (constants.screen_width/2, constants.screen_height/2+70), textcolor, (255, 0, 0), (150, 50, 50), font)
+                back = Menus().button('BACK', (constants.screen_width/2, constants.screen_height/2+140), textcolor, (255, 0, 0), (150, 50, 50), font)
      
                 #button function
             for event in pygame.event.get():
@@ -410,7 +413,7 @@ class Menus:
                         if res_bool:
                             if back.collidepoint(pygame.mouse.get_pos()):
                                 res_bool = False
-                            elif res1.collidepoint(pygame.mouse.get_pos()): # resolutin controls
+                            elif res1.collidepoint(pygame.mouse.get_pos()): #resolution controls
                                 constants.screen_height=1080
                                 constants.screen_width=1920
                                 Camera().resolution_control(constants.screen_width, constants.screen_height)
@@ -429,14 +432,15 @@ class Menus:
                             Menus().quit()
                         elif resolution_btn.collidepoint(pygame.mouse.get_pos()):
                             res_bool = True
-
-            pygame.display.update()      
+            pygame.display.update()
+            
     def resume(self):
         global menu_open
         menu_open = False
     def quit(self):
         pygame.quit()
         sys.exit()
+
     class inv_tile:
         def __init__(self, filled, panel = None,  item=None, active=False):
             self.filled = filled
@@ -444,26 +448,27 @@ class Menus:
             if panel:
                 self.panel = panel
             self.item = item
+
     def inventory(self):
-        global inv_open, inv, ui, add_health, active, table_spacing, row_width, equiped_items
+        global inv_open, inv, ui, add_health, active, table_spacing, row_width, equipped_items
         inv_surface.fill((0,0,0))
         rows=constants.inv_rows
-        collumns=constants.inv_collumns
+        columns=constants.inv_columns
         inv_width= int(constants.screen_width/2)
         inv_height = constants.screen_height-300
-        row_width=int(inv_width/(collumns+1))
+        row_width=int(inv_width/(columns+1))
         row_height=row_width
-        table_spacing=int((inv_width-row_width*collumns)/(collumns+1))
+        table_spacing=int((inv_width-row_width*columns)/(columns+1))
         inv_open=True
-        font_comic = pygame.font.SysFont('Comic Sans MS', 40)
-        font_comic_small = pygame.font.SysFont('Comic Sans MS', 20)
+        font = constants.font
+        font_small = constants.font_small
         image_size = row_width-10
-        text_inv = font_comic.render('INVENTORY', False, (66,75,84))
+        text_inv = font.render('INVENTORY', False, (66,75,84))
         textcolor=(255, 255, 255)
         active = None
         equiped_active = None
         add_health = True
-        inv_tilemap = [[Menus().inv_tile(False) for y in range(rows)] for x in range(collumns)]
+        inv_tilemap = [[Menus().inv_tile(False) for y in range(rows)] for x in range(columns)]
         equiped_map = [Menus().inv_tile(False) for a in range(5)]
         height = (row_width-10)*4+table_spacing*8
         equiped_rect_start_y = int((constants.screen_height-height)/2)
@@ -485,41 +490,38 @@ class Menus:
                 equiped_map[a].panel = pygame.draw.rect(inv_surface, (225,206,122), (equiped_x,equiped_y, row_width-10, row_height-10))
                 if equiped_active == equiped_map[a] or equiped_map[a].panel.collidepoint(pygame.mouse.get_pos()):
                     equiped_map[a].panel = pygame.draw.rect(inv_surface, (181,123,166), (equiped_x, equiped_y, row_width-10, row_height-10))
-                if equiped_items[a]:
-                    equiped_map[a].item = equiped_items[a]
+                if equipped_items[a]:
+                    equiped_map[a].item = equipped_items[a]
                 if equiped_map[a].item:
                     inv_surface.blit(pygame.transform.scale(equiped_map[a].item.inv_sprite, (image_size-10, image_size-10)), (equiped_x+5, equiped_y+5))
                 if equiped_active == equiped_map[a]:
                     if equiped_map[a].item:
-                        equiped_item_name = font_comic.render(equiped_map[a].item.name, False, textcolor)
-                        unequip_btn = Menus().button("UNEQUIP", (constants.screen_width-20, constants.screen_height - 90), (66,75,84), (214, 159, 42), (173, 128, 32), font_comic, "right")
+                        equiped_item_name = font.render(equiped_map[a].item.name, False, textcolor)
+                        unequip_btn = Menus().button("UNEQUIP", (constants.screen_width-20, constants.screen_height - 90), (66,75,84), (214, 159, 42), (173, 128, 32), font, "right")
                         inv_surface.blit(equiped_item_name, (constants.screen_width-equiped_item_name.get_rect()[2] - 20, constants.screen_height-equiped_item_name.get_rect()[3]/2 - 180))
                         if equiped_active.item.dmg:
-                            equiped_item_dmg = font_comic.render("Damage: "+str(equiped_active.item.dmg), False, textcolor)
+                            equiped_item_dmg = font.render("Damage: "+str(equiped_active.item.dmg), False, textcolor)
                             inv_surface.blit(equiped_item_dmg, (constants.screen_width-equiped_item_dmg.get_rect()[2] - 20, equiped_item_dmg.get_rect()[3]/2 + 100))
                         if equiped_active.item.armor:
-                            equiped_item_armor = font_comic.render("Armor: "+str(equiped_active.item.armor), False, textcolor)
+                            equiped_item_armor = font.render("Armor: "+str(equiped_active.item.armor), False, textcolor)
                             inv_surface.blit(equiped_item_armor, (constants.screen_width-equiped_item_armor.get_rect()[2] - 20, equiped_item_armor.get_rect()[3]/2 + 100))
 
-
-
             for i in range(rows):
-                for z in range(collumns):
-
+                for z in range(columns):
                     if active == inv_tilemap[i][z]:
                         if inv_tilemap[i][z].item:
-                            item_name = font_comic.render(inv_tilemap[i][z].item.name, False, textcolor)
+                            item_name = font.render(inv_tilemap[i][z].item.name, False, textcolor)
                             if inv_tilemap[i][z].item.dmg or inv_tilemap[i][z].item.armor:
-                                equip_btn = Menus().button("EQUIP", (constants.screen_width-20, constants.screen_height - 90), (66,75,84), (214, 159, 42), (173, 128, 32), font_comic, "right")
+                                equip_btn = Menus().button("EQUIP", (constants.screen_width-20, constants.screen_height - 90), (66,75,84), (214, 159, 42), (173, 128, 32), font, "right")
                             else:
-                                use_btn = Menus().button("USE", (constants.screen_width-20, constants.screen_height - 90), (66,75,84), (214, 159, 42), (173, 128, 32), font_comic, "right")
+                                use_btn = Menus().button("USE", (constants.screen_width-20, constants.screen_height - 90), (66,75,84), (214, 159, 42), (173, 128, 32), font, "right")
                             inv_surface.blit(item_name, (constants.screen_width-item_name.get_rect()[2] - 20, constants.screen_height-item_name.get_rect()[3]/2 - 180))
-                            discard_btn = Menus().button("DISCARD", (constants.screen_width-20, constants.screen_height-20), (66,75,84), (214, 159, 42), (173, 128, 32), font_comic, "right")
+                            discard_btn = Menus().button("DISCARD", (constants.screen_width-20, constants.screen_height-20), (66,75,84), (214, 159, 42), (173, 128, 32), font, "right")
                             if active.item.dmg:
-                                item_dmg = font_comic.render("Damage: "+str(active.item.dmg), False, textcolor)
+                                item_dmg = font.render("Damage: "+str(active.item.dmg), False, textcolor)
                                 inv_surface.blit(item_dmg, (constants.screen_width-item_dmg.get_rect()[2] - 20, item_dmg.get_rect()[3]/2 + 100))
                             if active.item.armor:
-                                item_armor = font_comic.render("Armor: "+str(active.item.armor), False, textcolor)
+                                item_armor = font.render("Armor: "+str(active.item.armor), False, textcolor)
                                 inv_surface.blit(item_armor, (constants.screen_width-item_armor.get_rect()[2] - 20, item_armor.get_rect()[3]/2 + 100))
 
                     x=(int(constants.screen_width/4)+table_spacing+z*(table_spacing+row_width))
@@ -534,8 +536,6 @@ class Menus:
                         inv_surface.blit(pygame.transform.scale(inv[list_pos].inv_sprite, (image_size, image_size)), (x+5, y+5))
                         inv_tilemap[i][z].item = inv[list_pos]
                         list_pos+=1
-        
-
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -547,7 +547,7 @@ class Menus:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         for i in range(rows):
-                            for z in range(collumns):
+                            for z in range(columns):
                                 if inv_tilemap[i][z].panel.collidepoint(pygame.mouse.get_pos()):
                                     if inv_tilemap[i][z].item:
                                         active = inv_tilemap[i][z]
@@ -573,54 +573,54 @@ class Menus:
                                     if active.item.name == "shield":
                                         if not equiped_map[1].item:
                                             equiped_map[1].item = active.item  
-                                            equiped_items[1] = active.item
+                                            equipped_items[1] = active.item
                                             constants.player_armor += active.item.armor 
                                     if active.item.dmg:
                                         if not equiped_map[0].item:
                                             equiped_map[0].item = active.item
-                                            equiped_items[0] = active.item
+                                            equipped_items[0] = active.item
                                             constants.player_dmg += active.item.dmg 
                                     if active.item.name == "hat":
                                         if not equiped_map[2].item:
                                             equiped_map[2].item = active.item
-                                            equiped_items[2] = active.item
+                                            equipped_items[2] = active.item
                                             constants.player_armor += active.item.armor 
                                     if active.item.name =="armor":
                                         if not equiped_map[3].item:
                                             equiped_map[3].item = active.item
-                                            equiped_items[3] = active.item
+                                            equipped_items[3] = active.item
                                             constants.player_armor += active.item.armor 
                                     if active.item.name == "boots":
                                         if not equiped_map[4].item:
                                             equiped_map[4].item = active.item
-                                            equiped_items[4] = active.item
+                                            equipped_items[4] = active.item
                                             constants.player_armor += active.item.armor 
                                     
                                     active = None
                         if unequip_btn:
                             if unequip_btn.collidepoint(pygame.mouse.get_pos()):
-                                if equiped_active.item in equiped_items:
+                                if equiped_active.item in equipped_items:
                                     inv.append(equiped_active.item)
                                     if equiped_active.item.name == "shield":
                                         constants.player_armor -= equiped_active.item.armor
                                         equiped_map[1].item = None
-                                        equiped_items[1] = 0 
+                                        equipped_items[1] = 0 
                                     elif equiped_active.item.dmg:
                                         constants.player_dmg -= equiped_active.item.dmg
                                         equiped_map[0].item = None
-                                        equiped_items[0] = 0
+                                        equipped_items[0] = 0
                                     elif equiped_active.item.name == "hat":
                                         constants.player_armor -= equiped_active.item.armor
                                         equiped_map[2].item = None
-                                        equiped_items[2] = 0
+                                        equipped_items[2] = 0
                                     elif equiped_active.item.name =="armor":
                                         constants.player_armor -= equiped_active.item.armor
                                         equiped_map[3].item = None
-                                        equiped_items[3] = 0
+                                        equipped_items[3] = 0
                                     elif equiped_active.item.name == "boots":
                                         constants.player_armor -= equiped_active.item.armor
                                         equiped_map[4].item = None
-                                        equiped_items[4] = 0 
+                                        equipped_items[4] = 0 
                                     equiped_active = None
                         if discard_btn:
                             if discard_btn.collidepoint(pygame.mouse.get_pos()):
@@ -628,10 +628,9 @@ class Menus:
                                     inv.remove(active.item)
                                     active = None
 
-                                    
-
             screen.blit(inv_surface, (0,0))
             pygame.display.update()
+
     def equiped(self, weapon, armor):
         global table_spacing, inv_surface, row_width
         height = row_width*4+table_spacing*5
@@ -699,8 +698,8 @@ class Actor:
                     object.hp -=damage
                 #elif self == player and object == player:
                 #    object.hp -=damage
-                
                 return True
+
     def draw(self):
         global map_surf
         if constants.Fov_enabled:
@@ -709,6 +708,7 @@ class Actor:
                 map_surf.blit(self.pilt, self.playerrect)
         else:
             map_surf.blit(self.pilt, self.playerrect)
+
     def spawn_enemy(self, room):
         gen_enemy = random.randint(0, 1)
         if gen_enemy:
@@ -716,6 +716,7 @@ class Actor:
             enemy_y = random.randint(room.y1+1, room.y2-1)
             characters.append(Actor(constants.enemy_pilt.get_rect(), constants.enemy_pilt, enemy_x, enemy_y, hp=100, ai=Actor().AI()))
             characters[-1].playerrect = characters[-1].playerrect.move(enemy_x*constants.tilesize, enemy_y*constants.tilesize)
+    
     class AI:
         def take_turn(self):
             global characters, player
@@ -736,6 +737,7 @@ class Actor:
                         Actor().healthBar(player.hp)
                         if not attack :
                             self.owner.move(x,y)
+
     def enemy_death(self):
         global map, items, characters, player
         for obj in characters:
@@ -750,14 +752,24 @@ class Actor:
                     if obj in characters:
                         characters.remove(obj)
                     print(len(characters))
+
     def healthBar(self, health):
         global ui
         bg_bar = pygame.draw.rect(ui, (120, 30, 30), (20, constants.screen_height-30, int(constants.max_health*1.5), 20))
-        bar = pygame.draw.rect(ui, constants.healthbar_color_high, (20, constants.screen_height-30, int(health/100*constants.max_health*1.5), 20))
+        
+        if health >= 0.66 * constants.max_health:
+            healthbar_color = constants.healthbar_color_high
+        elif health >= 0.33 * constants.max_health:
+            healthbar_color = constants.healthbar_color_med
+        else:
+            healthbar_color = constants.healthbar_color_low
+            
+        bar = pygame.draw.rect(ui, healthbar_color, (20, constants.screen_height-30, int(health/100*constants.max_health*1.5), 20))
+    
     def pick_up(self, x, y):
         global inv, map
         if not map[x][y].item is None:
-            if len(inv)<constants.inv_collumns*constants.inv_rows:
+            if len(inv) < constants.inv_columns*constants.inv_rows:
                 inv.append(map[x][y].item)
                 map[x][y].item = None
                 Map().map_to_surf()
@@ -767,28 +779,29 @@ class Item_action:
         global inv, add_health, active
         if active:
             if active.item.name == 'Health potion':
-                Item_action().heal_player(constants.health_potion_heal_ammount)
+                Item_action().heal_player(constants.health_potion_heal_amount)
                 Actor().healthBar(player.hp)
                 if active.item in inv:
                     inv.remove(active.item)
                     active = None
             elif active.item.name == 'Big Health potion':
-                Item_action().heal_player(constants.big_health_potion_heal_ammount)
+                Item_action().heal_player(constants.big_health_potion_heal_amount)
                 Actor().healthBar(player.hp)
                 if active.item in inv:
                     inv.remove(active.item)
                     active = None
             elif active.item.name == 'Beer':
-                Item_action().heal_player(constants.beer_heal_ammount)
+                Item_action().heal_player(constants.beer_heal_amount)
                 Actor().healthBar(player.hp)
                 if active.item in inv:
                     inv.remove(active.item)
                     active = None
-    def heal_player(self, ammount):
-        
-        player.hp += ammount
+
+    def heal_player(self, amount):
+        player.hp += amount
         if player.hp>constants.max_health:
             player.hp = constants.max_health
+
 main = Game()
 main.initialize()
 main.game_loop()

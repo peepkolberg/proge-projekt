@@ -42,7 +42,8 @@ grave_dark = pygame.transform.scale(grave_dark, (tilesize, tilesize))
 healthbar_color_low = 255, 0,0
 healthbar_color_med = 255, 255, 0
 healthbar_color_high = 0, 255, 0
-font = pygame.font.Font('data\\fonts\\VCR_OSD_MONO_1.001.ttf', 40)
+font = pygame.font.Font('Data\\fonts\\VCR_OSD_MONO_1.001.ttf', 40)
+font_small = pygame.font.Font('Data\\fonts\\VCR_OSD_MONO_1.001.ttf', 20)
 
 #PLAYER
 player_dmg = 5
@@ -64,10 +65,10 @@ fov_light_walls = True
 
 #ITEMS
 inv_rows = 4
-inv_collumns = 4
-health_potion_heal_ammount = 30
-big_health_potion_heal_ammount = 60
-beer_heal_ammount = 15
+inv_columns = 4
+health_potion_heal_amount = 30
+big_health_potion_heal_amount = 60
+beer_heal_amount = 15
 
 
 sword_sprite = pygame.image.load(os.path.join(dir,"Data",  "Sprites","sword.png"))
