@@ -46,6 +46,13 @@ font_small = pygame.font.Font('Data\\fonts\\VCR_OSD_MONO_1.001.ttf', 20)
 font_very_small = pygame.font.Font('Data\\fonts\\VCR_OSD_MONO_1.001.ttf', 12)
 white = 255, 255, 255
 
+#AUDIO
+background = "Data/audio/background.wav"
+hit1 = pygame.mixer.Sound("Data/audio/hit1.wav")
+hit2 = pygame.mixer.Sound("Data/audio/hit2.wav")
+hit3 = pygame.mixer.Sound("Data/audio/hit3.wav")
+hitsounds = [hit1, hit2, hit3]
+
 #PLAYER
 player_dmg = 5
 player_armor = 0

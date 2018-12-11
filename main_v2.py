@@ -23,6 +23,9 @@ class Game:
         map_surf = pygame.Surface((constants.map_width*constants.tilesize, constants.map_height*constants.tilesize))
         ui = pygame.Surface((constants.screen_width, constants.screen_height)).convert_alpha()
         ui.fill((0, 0, 0, 0))
+        pygame.mixer.music.load(constants.background)
+        pygame.mixer.music.set_volume(0.2)
+        pygame.mixer.music.play(-1)
         inv_surface = pygame.Surface((constants.screen_width, constants.screen_height)).convert_alpha()
         inv_surface.fill((0, 0, 0, 0))
         camera=Camera()
@@ -384,6 +387,7 @@ class Menus:
         global menu_open, screen, level
         menu_open=True
         res_bool = False
+        pygame.mixer.music.stop()
         font = constants.font
         textcolor = (255, 255, 255)
         text_pause = font.render('PAUSED', False, textcolor)
@@ -410,6 +414,7 @@ class Menus:
                     sys.exit()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
+                        pygame.mixer.music.play(-1)
                         menu_open = False
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
@@ -703,8 +708,11 @@ class Actor:
                                         object.x == self.x and object.y == self.y-1)):
                 if self !=player and object != player:
                     return False
+                elif self == player:
+                    hitsound = random.choice(constants.hitsounds)
+                    pygame.mixer.Sound.play(hitsound)
                 else:
-                    object.hp -=damage
+                    object.hp -= damage
                     return True
 
                 
