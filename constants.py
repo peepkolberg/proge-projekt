@@ -48,6 +48,7 @@ white = 255, 255, 255
 
 #AUDIO
 background = "Data/audio/background.wav"
+dead = "Data/audio/dead.wav"
 hit1 = pygame.mixer.Sound("Data/audio/hit1.wav")
 hit2 = pygame.mixer.Sound("Data/audio/hit2.wav")
 hit3 = pygame.mixer.Sound("Data/audio/hit3.wav")

@@ -118,6 +118,10 @@ class Game:
         global map_surf, characters, player, map
         if player.hp <= 0:
             game_over = True
+            pygame.mixer.music.stop()
+            pygame.mixer.music.load(constants.dead)
+            pygame.mixer.music.set_volume(0.8)
+            pygame.mixer.music.play()
             font = constants.font
             over_text = font.render('GAME OVER', False, (255,0,0))
             continue_text = font.render('Press Enter to restart level', False, (255,255,255))
@@ -129,6 +133,10 @@ class Game:
                         Menus().quit()
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_RETURN:
+                            pygame.mixer.music.stop()
+                            pygame.mixer.music.load(constants.background)
+                            pygame.mixer.music.set_volume(0.2)
+                            pygame.mixer.music.play()
                             characters.clear()
                             characters.append(player)
                             map[0][0].blocked = False
@@ -145,6 +153,10 @@ class Game:
                             game_over = False
                 pygame.display.update()
         elif form_menu:
+            pygame.mixer.music.stop()
+            pygame.mixer.music.load(constants.background)
+            pygame.mixer.music.set_volume(0.2)
+            pygame.mixer.music.play()
             characters.clear()
             characters.append(player)
             map[0][0].blocked = False
@@ -176,8 +188,8 @@ class Game:
         global characters, level
         if len(characters)==1:
             font = constants.font
-            over_text = font.render('ALL ENEMIES DESTROYED', False, (255,0,0))
-            continue_text = font.render('Press Enter to advance to next level', False, (255,255,255))
+            over_text = font.render('YOU HAVE SLAIN ALL ENEMIES!', False, (255,0,0))
+            continue_text = font.render('Press Enter to advance to the next level', False, (255,255,255))
             level_over = True
             while level_over:
                 screen.blit(over_text, (int(constants.screen_width/2-over_text.get_rect()[2]/2), int(constants.screen_height/2-over_text.get_rect()[3]/2)))
@@ -446,6 +458,7 @@ class Menus:
     def resume(self):
         global menu_open
         menu_open = False
+        pygame.mixer.music.play()
     def quit(self):
         pygame.quit()
         sys.exit()
