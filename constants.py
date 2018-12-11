@@ -44,6 +44,8 @@ healthbar_color_med = 255, 255, 0
 healthbar_color_high = 0, 255, 0
 font = pygame.font.Font('Data\\fonts\\VCR_OSD_MONO_1.001.ttf', 40)
 font_small = pygame.font.Font('Data\\fonts\\VCR_OSD_MONO_1.001.ttf', 20)
+font_very_small = pygame.font.Font('Data\\fonts\\VCR_OSD_MONO_1.001.ttf', 12)
+white = 255, 255, 255
 
 #PLAYER
 player_dmg = 5

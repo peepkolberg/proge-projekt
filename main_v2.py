@@ -16,7 +16,7 @@ else:
 
 class Game:
     def initialize(self):
-        global camera, player, map_surf, screen, kaart, characters, ui, inv_bool, inv, inv_surface, equipped_items, level
+        global camera, player, map_surf, screen, kaart, characters, ui, inv_bool, inv, inv_surface, equipped_items, level, font_xsmall
         pygame.init()
         pygame.font.init()
         screen = pygame.display.set_mode((constants.screen_width, constants.screen_height), pygame.HWSURFACE)
@@ -26,7 +26,7 @@ class Game:
         inv_surface = pygame.Surface((constants.screen_width, constants.screen_height)).convert_alpha()
         inv_surface.fill((0, 0, 0, 0))
         camera=Camera()
-        player = Actor(constants.player_pilt.get_rect(), constants.player_pilt, 0, 0, 100)
+        player = Actor(constants.player_pilt.get_rect(), constants.player_pilt, 0, 0, constants.max_health)
         Actor().healthBar(player.hp)
         inv=[]
         inv_bool=False
@@ -36,6 +36,7 @@ class Game:
             equipped_items.append(0)
         kaart = Map()
         level = 1
+        font_xsmall = constants.font_very_small
 
     def game_loop(self):
         global screen, map_surf,kaart, characters, ui
@@ -48,7 +49,7 @@ class Game:
         clock = pygame.time.Clock()
         font = pygame.font.Font(None, 30)
         while 1:
-            clock.tick(2000)
+            clock.tick(60)
             Game().win()
             Game().draw_game()
             fps = font.render(str(int(clock.get_fps())), True, pygame.Color('white'), (0,0,0))
@@ -136,9 +137,10 @@ class Game:
                                 Map().make_map()
                             map_surf.fill((0,0,0))
                             player.move(int(constants.map_width/2), int(constants.map_height/2))
-                            player.hp = 100
+                            player.hp = constants.max_health
                             Map().calculate_fov()
                             Map().map_to_surf()
+                            Actor().healthBar(player.hp)
                             game_over = False
                 pygame.display.update()
         elif form_menu:
@@ -149,11 +151,13 @@ class Game:
             Map().make_map()
             map_surf.fill((0,0,0))
             player.move(int(constants.map_width/2), int(constants.map_height/2))
-            player.hp = 100
+            player.hp = constants.max_health
             Map().calculate_fov()
             Map().map_to_surf()
+            Actor().healthBar(player.hp)
 
     def draw_game(self):
+        global font_xsmall
         Game().movement_loop()
         kaart.calculate_fov()
         kaart.map_to_surf()
@@ -162,6 +166,8 @@ class Game:
             obj.draw()
         screen.blit(map_surf, (0, 0),((player.x)*constants.tilesize-int(constants.screen_width/2), (player.y)*constants.tilesize-int(constants.screen_height/2), constants.screen_width, constants.screen_height))
         screen.blit(ui, (0,0))
+        disclaimer_text = font_xsmall.render("* It's not a bug, it's a feature", False, constants.white)
+        screen.blit(disclaimer_text, (constants.screen_width-disclaimer_text.get_rect()[2]-5, 5))
 
     def win(self):
         global characters, level
@@ -755,7 +761,7 @@ class Actor:
 
     def healthBar(self, health):
         global ui
-        bg_bar = pygame.draw.rect(ui, (120, 30, 30), (20, constants.screen_height-30, int(constants.max_health*1.5), 20))
+        bg_bar = pygame.draw.rect(ui, (120, 30, 30), (20, constants.screen_height-30, int(constants.max_health), 20))
         
         if health >= 0.66 * constants.max_health:
             healthbar_color = constants.healthbar_color_high
@@ -764,7 +770,7 @@ class Actor:
         else:
             healthbar_color = constants.healthbar_color_low
             
-        bar = pygame.draw.rect(ui, healthbar_color, (20, constants.screen_height-30, int(health/100*constants.max_health*1.5), 20))
+        bar = pygame.draw.rect(ui, healthbar_color, (20, constants.screen_height-30, int((health/constants.max_health)*constants.max_health), 20))
     
     def pick_up(self, x, y):
         global inv, map
