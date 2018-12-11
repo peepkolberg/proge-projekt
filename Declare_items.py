@@ -1,6 +1,6 @@
 import constants
 class Item():
-            def __init__(self, name, sprite,  x, y, inv_sprite, drop_percent, dmg = None, armor = None):
+            def __init__(self, name, sprite,  x, y, inv_sprite, drop_percent, dmg = None, armor = None, slot = None):
                 self.name = name
                 self.sprite = sprite
                 self.x  = x
@@ -9,16 +9,17 @@ class Item():
                 self.drop_percent = drop_percent
                 self.dmg = dmg
                 self.armor = armor
+                self.slot = slot
                 
 sword= Item("sword", constants.sword_sprite, 0, 0, constants.sword_sprite_inv, 20, dmg = 5)
-shield= Item("shield", constants.shield_sprite, 0, 0, constants.shield_sprite_inv,20, armor = 10)
-armor= Item("armor", constants.armor_sprite, 0, 0, constants.armor_sprite_inv, 10, armor = 15)
+shield= Item("shield", constants.shield_sprite, 0, 0, constants.shield_sprite_inv,20, armor = 10, slot = "shield_slot")
+armor= Item("armor", constants.armor_sprite, 0, 0, constants.armor_sprite_inv, 10, armor = 15, slot = "armor_slot")
 bag= Item("Bag", constants.bag_sprite, 0, 0, constants.bag_sprite_inv, 30)
 beer= Item("Beer", constants.beer_sprite, 0, 0, constants.beer_sprite_inv, 40)
 book= Item("book", constants.book_sprite, 0, 0, constants.book_sprite_inv, 30)
-boots= Item("boots", constants.boots_sprite, 0, 0, constants.boots_sprite_inv, 30, armor = 5)
+boots= Item("boots", constants.boots_sprite, 0, 0, constants.boots_sprite_inv, 30, armor = 5, slot = "boots_slot")
 flame_sword= Item("flame sword", constants.flame_sword_sprite, 0, 0, constants.flame_sword_sprite_inv, 5, dmg = 10)
-hat= Item("hat", constants.hat_sprite, 0, 0, constants.hat_sprite_inv, 30, armor = 5)
+hat= Item("hat", constants.hat_sprite, 0, 0, constants.hat_sprite_inv, 30, armor = 5, slot = "helmet_slot")
 potion= Item("Health potion", constants.potion_sprite, 0, 0, constants.potion_sprite_inv, 20)
 potion2= Item("Big Health potion", constants.potion2_sprite, 0, 0, constants.potion2_sprite_inv, 20)
 

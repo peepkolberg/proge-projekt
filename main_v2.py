@@ -41,11 +41,9 @@ class Game:
     def game_loop(self):
         global screen, map_surf,kaart, characters, ui
         kaart.make_map()
-        while True:
-            if len(characters)>=constants.min_enemies+1:
-                break
-            Map().make_map()
         player.move(int(constants.map_width/2), int(constants.map_height/2))
+        while len(characters)<constants.min_enemies+1:
+            Map().make_map()
         clock = pygame.time.Clock()
         font = pygame.font.Font(None, 30)
         while 1:
@@ -83,7 +81,9 @@ class Game:
                 if event.key == pygame.K_RSHIFT: # pick up item
                     Actor().pick_up(player.x, player.y)
                 if event.key == pygame.K_SPACE:
+                    #damage = random.randint(constants.player_min_dmg, constants.player_dmg)
                     player.attack(constants.player_dmg)
+                    #print("Player attacked for", damage, "damage")
                     Actor().enemy_death()
                     return 'attack'
 
@@ -131,12 +131,10 @@ class Game:
                             map[0][0].blocked = False
                             player.move(0-player.x, 0-player.y)
                             Map().make_map()
-                            while True:
-                                if len(characters)>=constants.min_enemies+1:
-                                    break
-                                Map().make_map()
                             map_surf.fill((0,0,0))
                             player.move(int(constants.map_width/2), int(constants.map_height/2))
+                            while len(characters)<constants.min_enemies+1:
+                                Map().make_map()
                             player.hp = constants.max_health
                             Map().calculate_fov()
                             Map().map_to_surf()
@@ -149,8 +147,10 @@ class Game:
             map[0][0].blocked = False
             player.move(0-player.x, 0-player.y)
             Map().make_map()
-            map_surf.fill((0,0,0))
             player.move(int(constants.map_width/2), int(constants.map_height/2))
+            while len(characters)<constants.min_enemies+1:
+                Map().make_map()
+            map_surf.fill((0,0,0))
             player.hp = constants.max_health
             Map().calculate_fov()
             Map().map_to_surf()
@@ -347,9 +347,6 @@ class Map:
             libtcod.map_compute_fov(fov_map, player.x, player.y, constants.fov_radius, constants.fov_light_walls, libtcod.FOV_BASIC)
 
 class Item:
-    def declare_items(self):
-        items = Declare_items.items
-    
     def generate_item(self, room, x, y, item, gen_bool):
         global spawn_item
         #gen_item = 1 #random.randint(0, 1)
@@ -401,10 +398,10 @@ class Menus:
                 quit_btn = Menus().button('QUIT', (constants.screen_width/2, constants.screen_height/2+70), textcolor, (255, 0, 0), (150, 50, 50), font)
                 resolution_btn = Menus().button('RESOLUTIONS', (constants.screen_width/2, constants.screen_height/2+140), textcolor, (255, 0, 0), (150, 50, 50), font)
             elif res_bool:
-                screen.fill((0,0,0,0))
+                screen.fill((0,0,0,0))                
                 res1 = Menus().button('1920x1080', (constants.screen_width/2, constants.screen_height/2), textcolor, (255, 0, 0), (150, 50, 50), font)
                 res2 = Menus().button('1280x720', (constants.screen_width/2, constants.screen_height/2+70), textcolor, (255, 0, 0), (150, 50, 50), font)
-                back = Menus().button('BACK', (constants.screen_width/2, constants.screen_height/2+140), textcolor, (255, 0, 0), (150, 50, 50), font)
+                back = Menus().button('BACK', (constants.screen_width/2, (constants.screen_height/2)+140), textcolor, (255, 0, 0), (150, 50, 50), font)
      
                 #button function
             for event in pygame.event.get():
@@ -417,6 +414,7 @@ class Menus:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         if res_bool:
+                            
                             if back.collidepoint(pygame.mouse.get_pos()):
                                 res_bool = False
                             elif res1.collidepoint(pygame.mouse.get_pos()): #resolution controls
@@ -428,7 +426,7 @@ class Menus:
                                 constants.screen_height=720
                                 constants.screen_width=1280
                                 Camera().resolution_control(constants.screen_width, constants.screen_height)
-                        
+                            
                         elif resume_btn.collidepoint(pygame.mouse.get_pos()):
                             Menus().resume()
                         elif restart_btn.collidepoint(pygame.mouse.get_pos()):
@@ -575,29 +573,34 @@ class Menus:
                         if equip_btn:
                             if equip_btn.collidepoint(pygame.mouse.get_pos()):
                                 if active.item in inv:
-                                    inv.remove(active.item)
-                                    if active.item.name == "shield":
+                                   
+                                    if active.item.slot == "shield_slot":
                                         if not equiped_map[1].item:
+                                            inv.remove(active.item)
                                             equiped_map[1].item = active.item  
                                             equipped_items[1] = active.item
                                             constants.player_armor += active.item.armor 
                                     if active.item.dmg:
                                         if not equiped_map[0].item:
+                                            inv.remove(active.item)
                                             equiped_map[0].item = active.item
                                             equipped_items[0] = active.item
                                             constants.player_dmg += active.item.dmg 
-                                    if active.item.name == "hat":
+                                    if active.item.slot == "helmet_slot":
                                         if not equiped_map[2].item:
+                                            inv.remove(active.item)
                                             equiped_map[2].item = active.item
                                             equipped_items[2] = active.item
                                             constants.player_armor += active.item.armor 
-                                    if active.item.name =="armor":
+                                    if active.item.slot =="armor_slot":
                                         if not equiped_map[3].item:
+                                            inv.remove(active.item)
                                             equiped_map[3].item = active.item
                                             equipped_items[3] = active.item
                                             constants.player_armor += active.item.armor 
-                                    if active.item.name == "boots":
+                                    if active.item.slot == "boots_slot":
                                         if not equiped_map[4].item:
+                                            inv.remove(active.item)
                                             equiped_map[4].item = active.item
                                             equipped_items[4] = active.item
                                             constants.player_armor += active.item.armor 
@@ -702,9 +705,10 @@ class Actor:
                     return False
                 else:
                     object.hp -=damage
-                #elif self == player and object == player:
-                #    object.hp -=damage
-                return True
+                    return True
+
+                
+
 
     def draw(self):
         global map_surf
@@ -738,8 +742,11 @@ class Actor:
             for obj in characters:
                 if obj == self.owner:
                     if not self.owner.hp <= 0:
+                        #damage = int(random.randint(constants.enemy_min_dmg, constants.enemy_max_dmg)*(1-constants.player_armor/100))
                         attack = self.owner.attack(constants.enemy_dmg*(1-constants.player_armor/100))
                         #print("Enemy attacked for", constants.enemy_dmg*(1-constants.player_armor/100), "damage")
+                        if player.hp <0:
+                            player.hp = 0
                         Actor().healthBar(player.hp)
                         if not attack :
                             self.owner.move(x,y)

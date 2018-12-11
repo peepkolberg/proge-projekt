@@ -7,7 +7,6 @@ pygame.init()
 #SCREEN
 screen_width = 1280
 screen_height = 720
-resolutions = {'1920x1080':(1920, 1080), '1366x720':(1366, 720), '800x600':(800, 600)}
 white_transparent= 255, 255,255,0
 fullscreen=False
 
