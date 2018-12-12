@@ -471,6 +471,43 @@ class Menus:
                 self.panel = panel
             self.item = item
 
+    def drawText(self, surface, text, color, rect, font, aa=False, bkg=None): # võetud lehelt https://www.pygame.org/wiki/TextWrap
+        rect = pygame.Rect(rect)
+        y = rect.top
+        lineSpacing = -2
+
+        # get the height of the font
+        fontHeight = font.size("Tg")[1]
+
+        while text:
+            i = 1
+
+            # determine if the row of text will be outside our area
+            if y + fontHeight > rect.bottom:
+                break
+
+            # determine maximum width of line
+            while font.size(text[:i])[0] < rect.width and i < len(text):
+                i += 1
+
+            # if we've wrapped the text, then adjust the wrap to the last word      
+            if i < len(text): 
+                i = text.rfind(" ", 0, i) + 1
+
+            # render the line and blit it to the surface
+            if bkg:
+                image = font.render(text[:i], 1, color, bkg)
+                image.set_colorkey(bkg)
+            else:
+                image = font.render(text[:i], aa, color)
+
+            surface.blit(image, (rect.left, y))
+            y += fontHeight + lineSpacing
+
+            # remove the text we just blitted
+            text = text[i:]
+
+        return text
     def inventory(self):
         global inv_open, inv, ui, add_health, active, table_spacing, row_width, equipped_items
         inv_surface.fill((0,0,0))
@@ -518,33 +555,39 @@ class Menus:
                     inv_surface.blit(pygame.transform.scale(equiped_map[a].item.inv_sprite, (image_size-10, image_size-10)), (equiped_x+5, equiped_y+5))
                 if equiped_active == equiped_map[a]:
                     if equiped_map[a].item:
-                        equiped_item_name = font.render(equiped_map[a].item.name, False, textcolor)
+                       
                         unequip_btn = Menus().button("UNEQUIP", (constants.screen_width-20, constants.screen_height - 90), (66,75,84), (214, 159, 42), (173, 128, 32), font, "right")
-                        inv_surface.blit(equiped_item_name, (constants.screen_width-equiped_item_name.get_rect()[2] - 20, constants.screen_height-equiped_item_name.get_rect()[3]/2 - 180))
+                        Menus().drawText(inv_surface, equiped_active.item.name, constants.white, (constants.screen_width*0.75+30, 30, constants.screen_width/4-40, 90), font)
                         if equiped_active.item.dmg:
                             equiped_item_dmg = font.render("Damage: "+str(equiped_active.item.dmg), False, textcolor)
-                            inv_surface.blit(equiped_item_dmg, (constants.screen_width-equiped_item_dmg.get_rect()[2] - 20, equiped_item_dmg.get_rect()[3]/2 + 100))
+                            inv_surface.blit(equiped_item_dmg, (constants.screen_width*0.75+30, equiped_item_dmg.get_rect()[3]/2 + 100))
                         if equiped_active.item.armor:
                             equiped_item_armor = font.render("Armor: "+str(equiped_active.item.armor), False, textcolor)
-                            inv_surface.blit(equiped_item_armor, (constants.screen_width-equiped_item_armor.get_rect()[2] - 20, equiped_item_armor.get_rect()[3]/2 + 100))
+                            inv_surface.blit(equiped_item_armor, (constants.screen_width*0.75+30, equiped_item_armor.get_rect()[3]/2 + 100))
+                        if equiped_active.item.description:
+                                Menus().drawText(inv_surface, equiped_active.item.description, constants.white, (constants.screen_width*0.75+30, 170, constants.screen_width/4-40, 100), font_small)
 
             for i in range(rows):
                 for z in range(columns):
                     if active == inv_tilemap[i][z]:
                         if inv_tilemap[i][z].item:
-                            item_name = font.render(inv_tilemap[i][z].item.name, False, textcolor)
                             if inv_tilemap[i][z].item.dmg or inv_tilemap[i][z].item.armor:
                                 equip_btn = Menus().button("EQUIP", (constants.screen_width-20, constants.screen_height - 90), (66,75,84), (214, 159, 42), (173, 128, 32), font, "right")
                             else:
                                 use_btn = Menus().button("USE", (constants.screen_width-20, constants.screen_height - 90), (66,75,84), (214, 159, 42), (173, 128, 32), font, "right")
-                            inv_surface.blit(item_name, (constants.screen_width-item_name.get_rect()[2] - 20, constants.screen_height-item_name.get_rect()[3]/2 - 180))
+                            Menus().drawText(inv_surface, active.item.name, constants.white, (constants.screen_width*0.75+30, 30, constants.screen_width/4-40, 90), font)
                             discard_btn = Menus().button("DISCARD", (constants.screen_width-20, constants.screen_height-20), (66,75,84), (214, 159, 42), (173, 128, 32), font, "right")
                             if active.item.dmg:
                                 item_dmg = font.render("Damage: "+str(active.item.dmg), False, textcolor)
-                                inv_surface.blit(item_dmg, (constants.screen_width-item_dmg.get_rect()[2] - 20, item_dmg.get_rect()[3]/2 + 100))
+                                inv_surface.blit(item_dmg, (constants.screen_width*0.75+30, item_dmg.get_rect()[3]/2 + 100))
                             if active.item.armor:
                                 item_armor = font.render("Armor: "+str(active.item.armor), False, textcolor)
-                                inv_surface.blit(item_armor, (constants.screen_width-item_armor.get_rect()[2] - 20, item_armor.get_rect()[3]/2 + 100))
+                                inv_surface.blit(item_armor, (constants.screen_width*0.75+30, item_armor.get_rect()[3]/2 + 100))
+                            if active.item.heal:
+                                item_heal = font_small.render("Heal ammount: "+str(active.item.heal), False, textcolor)
+                                inv_surface.blit(item_heal, (constants.screen_width*0.75+30, item_heal.get_rect()[3]/2 + 100))
+                            if active.item.description:
+                                Menus().drawText(inv_surface, active.item.description, constants.white, (constants.screen_width*0.75+30, 170, constants.screen_width/4-40, 100), font_small)
 
                     x=(int(constants.screen_width/4)+table_spacing+z*(table_spacing+row_width))
                     y=50+table_spacing+i*(table_spacing+row_height)
@@ -628,7 +671,7 @@ class Menus:
                             if unequip_btn.collidepoint(pygame.mouse.get_pos()):
                                 if equiped_active.item in equipped_items:
                                     inv.append(equiped_active.item)
-                                    if equiped_active.item.name == "shield":
+                                    if equiped_active.item.slot == "shield_slot":
                                         constants.player_armor -= equiped_active.item.armor
                                         equiped_map[1].item = None
                                         equipped_items[1] = 0 
@@ -636,15 +679,15 @@ class Menus:
                                         constants.player_dmg -= equiped_active.item.dmg
                                         equiped_map[0].item = None
                                         equipped_items[0] = 0
-                                    elif equiped_active.item.name == "hat":
+                                    elif equiped_active.item.slot == "helmet_slot":
                                         constants.player_armor -= equiped_active.item.armor
                                         equiped_map[2].item = None
                                         equipped_items[2] = 0
-                                    elif equiped_active.item.name =="armor":
+                                    elif equiped_active.item.slot =="armor_slot":
                                         constants.player_armor -= equiped_active.item.armor
                                         equiped_map[3].item = None
                                         equipped_items[3] = 0
-                                    elif equiped_active.item.name == "boots":
+                                    elif equiped_active.item.slot == "boots_slot":
                                         constants.player_armor -= equiped_active.item.armor
                                         equiped_map[4].item = None
                                         equipped_items[4] = 0 
@@ -724,12 +767,11 @@ class Actor:
                 elif self == player:
                     hitsound = random.choice(constants.hitsounds)
                     pygame.mixer.Sound.play(hitsound)
+                    object.hp -= damage
+                    return True
                 else:
                     object.hp -= damage
                     return True
-
-                
-
 
     def draw(self):
         global map_surf
@@ -763,9 +805,7 @@ class Actor:
             for obj in characters:
                 if obj == self.owner:
                     if not self.owner.hp <= 0:
-                        #damage = int(random.randint(constants.enemy_min_dmg, constants.enemy_max_dmg)*(1-constants.player_armor/100))
                         attack = self.owner.attack(constants.enemy_dmg*(1-constants.player_armor/100))
-                        #print("Enemy attacked for", constants.enemy_dmg*(1-constants.player_armor/100), "damage")
                         if player.hp <0:
                             player.hp = 0
                         Actor().healthBar(player.hp)
@@ -785,8 +825,7 @@ class Actor:
                     Map().map_to_surf()
                     if obj in characters:
                         characters.remove(obj)
-                    print(len(characters))
-
+        
     def healthBar(self, health):
         global ui
         bg_bar = pygame.draw.rect(ui, (120, 30, 30), (20, constants.screen_height-30, int(constants.max_health), 20))
@@ -812,20 +851,8 @@ class Item_action:
     def use_item(self):
         global inv, add_health, active
         if active:
-            if active.item.name == 'Health potion':
-                Item_action().heal_player(constants.health_potion_heal_amount)
-                Actor().healthBar(player.hp)
-                if active.item in inv:
-                    inv.remove(active.item)
-                    active = None
-            elif active.item.name == 'Big Health potion':
-                Item_action().heal_player(constants.big_health_potion_heal_amount)
-                Actor().healthBar(player.hp)
-                if active.item in inv:
-                    inv.remove(active.item)
-                    active = None
-            elif active.item.name == 'Beer':
-                Item_action().heal_player(constants.beer_heal_amount)
+            if active.item.heal:
+                Item_action().heal_player(active.item.heal)
                 Actor().healthBar(player.hp)
                 if active.item in inv:
                     inv.remove(active.item)
