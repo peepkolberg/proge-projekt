@@ -115,7 +115,7 @@ class Game:
         player_action = 'nothing'
 
     def restart(self, form_menu = False):
-        global map_surf, characters, player, map
+        global map_surf, characters, player, map, inv, equipped_items
         if player.hp <= 0:
             game_over = True
             pygame.mixer.music.stop()
@@ -123,8 +123,10 @@ class Game:
             pygame.mixer.music.set_volume(0.8)
             pygame.mixer.music.play()
             font = constants.font
-            over_text = font.render('GAME OVER', False, (255,0,0))
+            over_text = font.render('YOU DIED!', False, (255,0,0))
             continue_text = font.render('Press Enter to restart level', False, (255,255,255))
+            inv = []
+            equipped_items = [0,0,0,0,0]
             while game_over:
                 screen.blit(over_text, (int(constants.screen_width/2-over_text.get_rect()[2]/2), int(constants.screen_height/2-over_text.get_rect()[3]/2)))
                 screen.blit(continue_text, (int(constants.screen_width/2-continue_text.get_rect()[2]/2), int(constants.screen_height/2-continue_text.get_rect()[3]/2+50)))
@@ -401,23 +403,23 @@ class Menus:
         res_bool = False
         pygame.mixer.music.stop()
         font = constants.font
-        textcolor = (255, 255, 255)
-        text_pause = font.render('PAUSED', False, textcolor)
-        text_level = font.render('Level: '+str(level), False, textcolor)
+        textcolor = (255, 255, 0)
+        text_pause = font.render('PAUSED', False, (255, 255, 255))
+        text_level = font.render('Level: '+str(level), False, (255, 255, 255))
         while menu_open:
             if not res_bool:
                 screen.fill((0,0,0,0))
                 screen.blit(text_level, (int(constants.screen_width/2-text_level.get_rect()[2]/2), int(constants.screen_height/2-text_pause.get_rect()[3]/2)-140))
                 screen.blit(text_pause, (int(constants.screen_width/2-text_pause.get_rect()[2]/2), int(constants.screen_height/2-text_pause.get_rect()[3]/2)-300))
-                resume_btn = Menus().button('RESUME', (constants.screen_width/2, constants.screen_height/2-70), textcolor, (255, 0, 0), (150, 50, 50), font)
-                restart_btn = Menus().button('RESTART', (constants.screen_width/2, constants.screen_height/2), textcolor, (255, 0, 0), (150, 50, 50), font)
-                quit_btn = Menus().button('QUIT', (constants.screen_width/2, constants.screen_height/2+70), textcolor, (255, 0, 0), (150, 50, 50), font)
-                resolution_btn = Menus().button('RESOLUTIONS', (constants.screen_width/2, constants.screen_height/2+140), textcolor, (255, 0, 0), (150, 50, 50), font)
+                resume_btn = Menus().button('RESUME', (constants.screen_width/2, constants.screen_height/2-70), textcolor, (105, 105, 105), (173, 128, 32), font)
+                restart_btn = Menus().button('RESTART', (constants.screen_width/2, constants.screen_height/2), textcolor, (105, 105, 105), (173, 128, 32), font)
+                quit_btn = Menus().button('QUIT', (constants.screen_width/2, constants.screen_height/2+70), textcolor, (105, 105, 105), (173, 128, 32), font)
+                resolution_btn = Menus().button('RESOLUTIONS', (constants.screen_width/2, constants.screen_height/2+140), textcolor, (105, 105, 105), (173, 128, 32), font)
             elif res_bool:
                 screen.fill((0,0,0,0))                
-                res1 = Menus().button('1920x1080', (constants.screen_width/2, constants.screen_height/2), textcolor, (255, 0, 0), (150, 50, 50), font)
-                res2 = Menus().button('1280x720', (constants.screen_width/2, constants.screen_height/2+70), textcolor, (255, 0, 0), (150, 50, 50), font)
-                back = Menus().button('BACK', (constants.screen_width/2, (constants.screen_height/2)+140), textcolor, (255, 0, 0), (150, 50, 50), font)
+                res1 = Menus().button('1920x1080', (constants.screen_width/2, constants.screen_height/2), textcolor, (105, 105, 105), (173, 128, 32), font)
+                res2 = Menus().button('1280x720', (constants.screen_width/2, constants.screen_height/2+70), textcolor, (105, 105, 105), (173, 128, 32), font)
+                back = Menus().button('BACK', (constants.screen_width/2, (constants.screen_height/2)+140), textcolor, (105, 105, 105), (173, 128, 32), font)
      
                 #button function
             for event in pygame.event.get():
@@ -522,7 +524,7 @@ class Menus:
         font = constants.font
         font_small = constants.font_small
         image_size = row_width-10
-        text_inv = font.render('INVENTORY', False, (66,75,84))
+        text_inv = font.render('INVENTORY', False, (255, 255, 255))
         textcolor=(255, 255, 255)
         active = None
         equiped_active = None
@@ -534,7 +536,7 @@ class Menus:
         while inv_open:
             inv_surface.fill((0,0,0, 0))
             screen.fill((0,0,0,0))
-            pygame.draw.rect(inv_surface, (214,187,192), (int(constants.screen_width/4), 0, int(constants.screen_width*0.5), constants.screen_height))
+            pygame.draw.rect(inv_surface, (105, 105, 105), (int(constants.screen_width/4), 0, int(constants.screen_width*0.5), constants.screen_height))
             inv_surface.blit(text_inv, (int(constants.screen_width/2-text_inv.get_rect()[2]/2), 30-text_inv.get_rect()[3]/2))
             list_pos=0
             use_btn = 0
@@ -542,7 +544,7 @@ class Menus:
             discard_btn=0
             unequip_btn = 0
             
-            pygame.draw.rect(inv_surface, (214,187,192), (0, int((constants.screen_height-height)/2), table_spacing+row_width-10, height-10))
+            pygame.draw.rect(inv_surface, (105, 105, 105), (0, int((constants.screen_height-height)/2), table_spacing+row_width-10, height-10))
             for a in range(5):
                 equiped_x = table_spacing/2
                 equiped_y = equiped_rect_start_y+table_spacing/2+a*(table_spacing/2+row_width-10)
@@ -556,7 +558,7 @@ class Menus:
                 if equiped_active == equiped_map[a]:
                     if equiped_map[a].item:
                        
-                        unequip_btn = Menus().button("UNEQUIP", (constants.screen_width-20, constants.screen_height - 90), (66,75,84), (214, 159, 42), (173, 128, 32), font, "right")
+                        unequip_btn = Menus().button("UNEQUIP", (constants.screen_width-20, constants.screen_height - 90), (255, 255, 0), (105, 105, 105), (173, 128, 32), font, "right")
                         Menus().drawText(inv_surface, equiped_active.item.name, constants.white, (constants.screen_width*0.75+30, 30, constants.screen_width/4-40, 90), font)
                         if equiped_active.item.dmg:
                             equiped_item_dmg = font.render("Damage: "+str(equiped_active.item.dmg), False, textcolor)
@@ -572,11 +574,11 @@ class Menus:
                     if active == inv_tilemap[i][z]:
                         if inv_tilemap[i][z].item:
                             if inv_tilemap[i][z].item.dmg or inv_tilemap[i][z].item.armor:
-                                equip_btn = Menus().button("EQUIP", (constants.screen_width-20, constants.screen_height - 90), (66,75,84), (214, 159, 42), (173, 128, 32), font, "right")
+                                equip_btn = Menus().button("EQUIP", (constants.screen_width-20, constants.screen_height - 90), (255, 255, 0), (105, 105, 105), (173, 128, 32), font, "right")
                             else:
-                                use_btn = Menus().button("USE", (constants.screen_width-20, constants.screen_height - 90), (66,75,84), (214, 159, 42), (173, 128, 32), font, "right")
+                                use_btn = Menus().button("USE", (constants.screen_width-20, constants.screen_height - 90), (255, 255, 0), (105, 105, 105), (173, 128, 32), font, "right")
                             Menus().drawText(inv_surface, active.item.name, constants.white, (constants.screen_width*0.75+30, 30, constants.screen_width/4-40, 90), font)
-                            discard_btn = Menus().button("DISCARD", (constants.screen_width-20, constants.screen_height-20), (66,75,84), (214, 159, 42), (173, 128, 32), font, "right")
+                            discard_btn = Menus().button("DISCARD", (constants.screen_width-20, constants.screen_height-20), (255, 255, 0), (105, 105, 105), (173, 128, 32), font, "right")
                             if active.item.dmg:
                                 item_dmg = font.render("Damage: "+str(active.item.dmg), False, textcolor)
                                 inv_surface.blit(item_dmg, (constants.screen_width*0.75+30, item_dmg.get_rect()[3]/2 + 100))
@@ -584,7 +586,7 @@ class Menus:
                                 item_armor = font.render("Armor: "+str(active.item.armor), False, textcolor)
                                 inv_surface.blit(item_armor, (constants.screen_width*0.75+30, item_armor.get_rect()[3]/2 + 100))
                             if active.item.heal:
-                                item_heal = font_small.render("Heal ammount: "+str(active.item.heal), False, textcolor)
+                                item_heal = font_small.render("Heal amount: "+str(active.item.heal), False, textcolor)
                                 inv_surface.blit(item_heal, (constants.screen_width*0.75+30, item_heal.get_rect()[3]/2 + 100))
                             if active.item.description:
                                 Menus().drawText(inv_surface, active.item.description, constants.white, (constants.screen_width*0.75+30, 170, constants.screen_width/4-40, 100), font_small)
